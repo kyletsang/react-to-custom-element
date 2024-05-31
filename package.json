@@ -1,0 +1,26 @@
+{
+  "name": "react-to-custom-element",
+  "version": "0.0.0",
+  "description": "Convert React components to custom elements",
+  "main": "dist/index.js",
+  "scripts": {
+    "bootstrap": "npm i && npm i --prefix test-page",
+    "build": "tsc",
+    "dev": "npm run dev --prefix test-page"
+  },
+  "devDependencies": {
+    "@kyletsang/prettier-config": "^1.1.1",
+    "@kyletsang/semantic-release-config": "^1.0.1",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "prettier": "^3.2.5",
+    "react": "^19.0.0-rc-9d4fba0788-20240530",
+    "react-dom": "^19.0.0-rc-9d4fba0788-20240530",
+    "semantic-release": "^23.1.1",
+    "typescript": "^5.4.5"
+  },
+  "peerDependencies": {
+    "react": "^19",
+    "react-dom": "^19"
+  }
+}
