@@ -1,0 +1,3 @@
+{
+  "extends": "@kyletsang/semantic-release-config"
+}
