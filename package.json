@@ -1,6 +1,6 @@
 {
   "name": "react-to-custom-element",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Convert React components to custom elements",
   "main": "dist/index.js",
   "scripts": {
