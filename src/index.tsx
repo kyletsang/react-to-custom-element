@@ -15,12 +15,7 @@ interface Options<P> {
   /**
    * Properties to be defined on the custom element.
    */
-  properties?:
-    | Record<
-        keyof P,
-        "string" | "number" | "boolean" | "array" | "object" | "function"
-      >
-    | undefined;
+  properties?: string[] | undefined;
 
   /**
    * Attributes to be defined on the custom element. The names
@@ -34,31 +29,20 @@ export default function reactToCustomElement<P>(
   {
     strictMode = true,
     shadowMode,
-    properties = {} as NonNullable<Options<P>["properties"]>,
+    properties = [],
     attributes = [],
   }: Options<P>,
 ) {
-  const observedAttributes: string[] = [];
-  const props: string[] = [];
-
-  for (const key of Object.keys(properties)) {
-    props.push(key);
-  }
-
-  for (const attributeName of attributes) {
-    observedAttributes.push(attributeName);
-  }
-
   // https://react.dev/blog/2024/04/25/react-19#support-for-custom-elements
-  // https://github.com/facebook/react/blob/9d4fba078812de0363fe9514b943650fa479e8af/packages/react-dom-bindings/src/client/DOMPropertyOperations.js#L189-L231
   class CustomElement extends HTMLElement {
-    static observedAttributes = observedAttributes;
+    static observedAttributes = [...attributes];
 
     private container: HTMLElement | ShadowRoot;
     private root: Root;
     private connected = false;
-    private componentProps = {} as P;
-    private componentAttributes: Record<string, string> = {};
+    private _componentProps = {} as P;
+    private _componentAttributes: Record<string, string> = {};
+    private _componentEventHandlers = {};
 
     constructor() {
       super();
@@ -70,14 +54,14 @@ export default function reactToCustomElement<P>(
 
       // React detects if the node has the corresponding properties otherwise
       // props gets set as attributes.
-      for (const propertyName of props) {
+      for (const propertyName of properties) {
         Object.defineProperty(this, propertyName, {
           enumerable: true,
           get() {
-            return this.componentProps[propertyName];
+            return this._componentProps[propertyName];
           },
           set(value) {
-            this.componentProps[propertyName] = value;
+            this._componentProps[propertyName] = value;
             this.render();
           },
         });
@@ -95,8 +79,35 @@ export default function reactToCustomElement<P>(
     }
 
     attributeChangedCallback(attribute: string, _: string, value: string) {
-      this.componentAttributes[attribute] = value;
+      this._componentAttributes[attribute] = value;
       this.render();
+    }
+
+    addEventListener(
+      type: string,
+      listener: EventListenerOrEventListenerObject,
+      options?: boolean | AddEventListenerOptions | undefined,
+    ): void {
+      for (const propName of properties) {
+        // Ignore setting custom event handlers for props named `on***`. Store the callback and pass it directly to the component.
+        // https://github.com/facebook/react/blob/9d4fba078812de0363fe9514b943650fa479e8af/packages/react-dom-bindings/src/client/DOMPropertyOperations.js#L189-L231
+        if (propName[0] === "o" && propName[1] === "n") {
+          const useCapture = propName.endsWith("Capture");
+          const eventName = propName.slice(
+            2,
+            useCapture ? propName.length - 7 : undefined,
+          );
+
+          if (eventName === type) {
+            // This is an event handler that user passed in.
+            // @ts-expect-error - TODO
+            this._componentEventHandlers[propName] = listener;
+            return;
+          }
+        }
+      }
+
+      super.addEventListener(type, listener, options);
     }
 
     private render() {
@@ -108,8 +119,11 @@ export default function reactToCustomElement<P>(
 
       this.root.render(
         <Wrapper>
-          {/* @ts-expect-error - TODO */}
-          <Component {...this.componentAttributes} {...this.componentProps} />
+          <Component
+            {...this._componentAttributes}
+            {...this._componentProps}
+            {...this._componentEventHandlers}
+          />
         </Wrapper>,
       );
     }

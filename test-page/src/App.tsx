@@ -48,7 +48,7 @@ function App() {
           propObject={{ text, number: counter }}
           propArray={[1, 2, 3]}
           propFunction={(args) => console.log("propFunction called", args)}
-          onMyEvent={(event) => console.log("onEvent called", event)}
+          onMyEvent={(str) => console.log("onEvent called", str)}
           my-first-attribute={"first-attribute-value " + text}
           my-second-attribute={"second-attribute-value " + text}
         />
