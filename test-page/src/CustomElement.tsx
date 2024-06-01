@@ -8,7 +8,7 @@ export interface CustomElementProps {
   propObject?: Record<string, unknown> | undefined;
   propArray?: unknown[] | undefined;
   propFunction?: (args: unknown) => void | undefined;
-  onMyEvent?: ((event: Event) => void) | undefined;
+  onMyEvent?: ((str: string) => void) | undefined;
 }
 
 function CustomElement({
@@ -24,8 +24,7 @@ function CustomElement({
   const ref = useRef<HTMLDivElement>(null);
 
   function handleMyEventCallback() {
-    const event = new CustomEvent("MyEvent", { detail: "event" });
-    ref.current!.parentNode!.dispatchEvent(event);
+    onMyEvent?.("hello");
   }
 
   function handlePropFunctionCallback() {
@@ -43,7 +42,7 @@ function CustomElement({
             propObject,
             propArray,
             propFunction: propFunction ? "function" : undefined,
-            onEvent: onMyEvent ? "function" : undefined,
+            onMyEvent: onMyEvent ? "function" : undefined,
             spreadProps: {
               ...props,
             },
@@ -59,15 +58,15 @@ function CustomElement({
 }
 
 const element = reactToCustomElement(CustomElement, {
-  properties: {
-    propString: "string",
-    propNumber: "number",
-    propBoolean: "boolean",
-    propObject: "object",
-    propArray: "array",
-    propFunction: "function",
-    onMyEvent: "function",
-  },
+  properties: [
+    "propString",
+    "propNumber",
+    "propBoolean",
+    "propObject",
+    "propArray",
+    "propFunction",
+    "onMyEvent",
+  ],
   attributes: ["my-first-attribute", "my-second-attribute"],
 });
 

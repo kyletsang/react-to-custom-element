@@ -2,6 +2,12 @@
   "name": "react-to-custom-element",
   "version": "1.0.0",
   "description": "Convert React components to custom elements",
+  "keywords": [
+    "react",
+    "custom element",
+    "web component",
+    "html element"
+  ],
   "main": "dist/index.js",
   "scripts": {
     "bootstrap": "npm i && npm i --prefix test-page",
